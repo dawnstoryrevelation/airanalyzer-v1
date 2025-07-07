@@ -1,0 +1,24 @@
+Welcome to the Idea Zone! Feel free to pitch in your ideas!
+
+Jasper: What are your ideas? A possible idea is to create the website with a professional but dynamic look.
+Eden: A Website that with an interactive globe that shows the current air quality of the area you click on.
+
+**Collaborator Approval** - Unanimous Approval of Eden's Idea (Approved)
+
+Jasper: I'm thinking there could be like two parts of the website. One could be stats of each country on the globe currently with the model's prediction of future stats,
+AND a feature to take a picture of your current environment, and then the model calculates the air pollution levels of the area, based on your image. What do you think?
+
+Vincent: predict what impact plant tree have on airpol level
+
+Leon: maybe add statistics for how much air pollution comes from different sources such as cars, factories, etc and a list of every country's percentage of air pollution,
+also showing a reasonable percentage for comparison
+
+Leon: air pollution images https://unsplash.com/s/photos/air-pollution or https://www.istockphoto.com/photos/air-pollution
+
+Jasper: We train two separate neural network models, one as a , and one as a 
+PSS Ensemble. Then, we use an MAA to orchestrate predictions on the application. 
+
+**Collaborator Approval** - Unanimous Approval of All Ideas So Far (Approved)
+
+Jasper: How big should the model be in params? I think we shouldn't top anywhere more than 100 million params. I'm suggesting maybe around 30M?
+Manageable with a T4 GPU or L4.
