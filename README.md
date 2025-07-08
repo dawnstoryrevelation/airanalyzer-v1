@@ -8,4 +8,6 @@ Eden (Designer)
 Leon (Designer)
 Jasper (Solution Architect)
 
-In this project, we train a 30M parameter model that pred
+https://dawnstoryrevelation.github.io/airanalyzer-v1/airanalyzercnn.html
+
+In this project, we train a 30M parameter model that takes images as input and analyses data to see how much air pollution data there is.
