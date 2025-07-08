@@ -3,11 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Air Analyzer V1 CNN</title>
+    <title>Air Analyzer Pro</title>
     
-    <!-- External Libraries: ONNX Runtime for in-browser AI, Chart.js for dynamic graphs -->
+    <!-- External Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;900&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         /*
@@ -16,225 +25,175 @@
         ==========================================================================
         */
         :root {
-            --color-beige: #F5F5DC;
-            --color-egg-white: #F0EAD6;
-            --color-cosmic-black: #0D0D1A;
-            --color-celestial-blue: #3A7CA5;
-            --color-cerulean-blue: #2A52BE;
-            --color-light-gray: #D3D3D3;
-            --color-premium-gold: #FFD700;
-            --font-primary: 'Helvetica Neue', 'Arial', sans-serif;
+            --color-bg-light: #F5F5DC;
+            --color-bg-dark: #0D0D1A;
+            --color-primary: #3A7CA5;
+            --color-primary-dark: #2A52BE;
+            --color-text-light: #E0E0E0;
+            --color-text-dark: #1A1A1A;
+            --color-gold: #FFD700;
+            --color-glass-bg: rgba(20, 20, 35, 0.65);
+            --color-glass-border: rgba(58, 124, 165, 0.3);
+            
+            --font-heading: 'Poppins', sans-serif;
+            --font-body: 'Inter', sans-serif;
+
+            --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --shadow-heavy: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
 
         body {
             margin: 0;
-            font-family: var(--font-primary);
-            background-color: var(--color-beige);
-            color: #333;
+            font-family: var(--font-body);
+            background-color: var(--color-bg-light);
+            color: var(--color-text-dark);
             overflow-x: hidden;
+            line-height: 1.6;
         }
 
-        .parallax-container {
-            height: 100vh;
-            overflow-y: auto;
-            overflow-x: hidden;
-            perspective: 1px;
-            -webkit-perspective: 1px;
-            transform-style: preserve-3d;
-            -webkit-transform-style: preserve-3d;
-        }
-
-        .parallax-layer {
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            transform-style: preserve-3d;
-            -webkit-transform-style: preserve-3d;
-        }
-
-        .parallax-layer-bg {
-            transform: translateZ(-1px) scale(2);
-            -webkit-transform: translateZ(-1px) scale(2);
-        }
-
-        .parallax-layer-base {
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-        }
-
-        .content-section {
+        .section-container {
             position: relative;
-            padding: 8vh 5vw;
-            min-height: 84vh;
+            padding: 12vh 5vw;
+            min-height: 76vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            background-color: transparent;
+            z-index: 2;
+        }
+
+        .wave-divider {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
             z-index: 1;
         }
+        .wave-divider svg { position: relative; display: block; width: calc(100% + 1.3px); height: 120px; }
+        .wave-divider .shape-fill { fill: var(--color-bg-light); }
+        #divider-app .shape-fill { fill: var(--color-bg-dark); }
+        
 
         /*
         ==========================================================================
-        ||  HERO SECTION
+        ||  BACKGROUND & HERO SECTION
         ==========================================================================
         */
-        #hero {
-            background-color: var(--color-beige);
-            color: var(--color-cosmic-black);
-            overflow: hidden; /* To contain geometric shapes */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background-color: var(--color-bg-light);
+            z-index: 0;
         }
+        
+        #hero { color: var(--color-text-dark); }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         #hero h1 {
-            font-size: calc(3rem + 3vw);
+            font-family: var(--font-heading);
+            font-size: clamp(3rem, 8vw, 6.5rem);
             font-weight: 900;
             margin: 0;
-            animation: fadeIn 1.5s ease-out forwards;
+            animation: fadeInDown 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
 
         #hero p {
-            font-size: calc(1rem + 1vw);
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
             margin-top: 20px;
+            max-width: 600px;
             opacity: 0;
-            animation: fadeIn 1.5s ease-out 1s forwards;
-        }
-
-        /* Geometric Block Animations */
-        .geo-blocks {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
+            animation: fadeInUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s forwards;
         }
         
-        .block {
-            position: absolute;
-            background-color: rgba(0, 0, 0, 0.05);
-            opacity: 0;
-            animation: waft 15s infinite ease-in-out;
-        }
-
-        @keyframes waft {
-            0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
-            20% { opacity: 1; }
-            80% { opacity: 0.5; }
-            90% { transform: translateY(-100vh) translateX(50vw) rotate(360deg); opacity: 0; }
-        }
-
-        .block:nth-child(1) { width: 150px; height: 150px; top: 20%; left: 10%; animation-delay: 0s; }
-        .block:nth-child(2) { width: 50px; height: 50px; top: 80%; left: 25%; animation-delay: 2s; }
-        .block:nth-child(3) { width: 100px; height: 100px; top: 10%; left: 80%; animation-delay: 4s; }
-        .block:nth-child(4) { width: 80px; height: 80px; top: 60%; left: 90%; animation-delay: 6s; }
-        .block:nth-child(5) { width: 120px; height: 120px; top: 70%; left: 5%; animation-delay: 8s; }
-
-
         /*
         ==========================================================================
         ||  HOW IT WORKS SECTION
         ==========================================================================
         */
         #how-it-works {
-            background: linear-gradient(to bottom, var(--color-beige), var(--color-egg-white));
+            background: var(--color-bg-light);
         }
 
+        .content-wrapper {
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 50px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
         #how-it-works h2, #application h2 {
-            font-size: calc(2rem + 2vw);
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 5vw, 3.5rem);
             font-weight: 700;
             margin-bottom: 40px;
         }
 
-        #how-it-works .content-wrapper {
-            max-width: 800px;
-            background: rgba(255, 255, 255, 0.5);
-            padding: 40px;
-            border-radius: 15px;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
-        }
-
         #how-it-works p {
             font-size: 1.2rem;
-            line-height: 1.6;
             margin-bottom: 40px;
         }
 
         .cta-button {
-            padding: 15px 35px;
-            font-size: 1.1rem;
+            padding: 18px 40px;
+            font-size: 1.2rem;
             font-weight: bold;
             color: #fff;
-            background: var(--color-celestial-blue);
+            background: linear-gradient(45deg, var(--color-primary-dark), var(--color-primary));
             border: none;
             border-radius: 50px;
             cursor: pointer;
             text-decoration: none;
-            position: relative;
-            overflow: hidden;
+            box-shadow: var(--shadow-light);
             transition: all 0.3s ease;
         }
-
         .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(42, 82, 190, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(42, 82, 190, 0.4);
         }
 
-        .cta-button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.4s ease, height 0.4s ease;
-        }
-
-        .cta-button:active::before {
-            width: 300px;
-            height: 300px;
-        }
-        
         /*
         ==========================================================================
         ||  APPLICATION SECTION
         ==========================================================================
         */
         #application {
-            background: var(--color-cosmic-black);
-            color: var(--color-light-gray);
-            padding-bottom: 50px;
+            background-color: var(--color-bg-dark);
+            color: var(--color-text-light);
+            min-height: 100vh;
         }
 
         .app-container {
             width: 100%;
             max-width: 1200px;
-            background: rgba(20, 20, 35, 0.7);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 0 40px rgba(58, 124, 165, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(58, 124, 165, 0.3);
+            background: var(--color-glass-bg);
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0 0 50px rgba(58, 124, 165, 0.15);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--color-glass-border);
+            transition: all 0.5s ease;
         }
         
         #application.deep-mode .app-container {
-            box-shadow: 0 0 60px rgba(150, 200, 255, 0.4);
+            box-shadow: 0 0 80px rgba(150, 200, 255, 0.4), 0 0 30px rgba(255, 215, 0, 0.2);
+            background: rgba(10, 10, 25, 0.7);
         }
 
         .mode-selector {
@@ -242,22 +201,25 @@
             justify-content: center;
             gap: 15px;
             margin-bottom: 40px;
+            background: rgba(0,0,0,0.2);
+            padding: 8px;
+            border-radius: 12px;
         }
 
         .mode-btn {
             padding: 12px 25px;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 500;
             background: transparent;
-            color: var(--color-light-gray);
-            border: 2px solid var(--color-celestial-blue);
-            border-radius: 10px;
+            color: var(--color-text-light);
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
         }
-
-        .mode-btn.active, .mode-btn:hover {
-            background: var(--color-celestial-blue);
+        .mode-btn.active {
+            background: var(--color-primary);
             color: #fff;
             box-shadow: 0 0 15px rgba(58, 124, 165, 0.5);
         }
@@ -266,9 +228,7 @@
             font-size: 0.7em;
             font-weight: bold;
             margin-left: 8px;
-            position: relative;
-            display: inline-block;
-            color: var(--color-premium-gold);
+            color: var(--color-gold);
             animation: shimmer 2s infinite linear;
             background: linear-gradient(90deg, #ffd700, #f0e68c, #ffd700);
             background-size: 200% 100%;
@@ -276,99 +236,79 @@
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
         .app-content { display: none; }
-        .app-content.active { display: block; }
+        .app-content.active { display: block; animation: fadeInUp 0.5s ease; }
         
         .upload-area {
-            border: 3px dashed var(--color-celestial-blue);
+            border: 3px dashed var(--color-primary);
             border-radius: 15px;
             padding: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
+            background: rgba(0,0,0,0.2);
         }
         .upload-area:hover {
             background-color: rgba(58, 124, 165, 0.1);
-            border-color: var(--color-light-gray);
+            border-color: var(--color-text-light);
         }
         
-        #camera-view, #map {
-            width: 100%;
-            height: 400px;
-            background: #000;
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-        #camera-video {
-            width:100%; height:100%; object-fit: cover; border-radius: 15px;
-        }
+        #camera-view, #map { width: 100%; height: 400px; background: #000; border-radius: 15px; margin-bottom: 20px; }
+        #camera-video { width:100%; height:100%; object-fit: cover; border-radius: 15px; }
 
         .app-button {
             margin-top: 20px;
             padding: 12px 25px;
             font-size: 1rem;
-            background: var(--color-celestial-blue);
+            font-weight: 500;
+            background: var(--color-primary);
             color: #fff;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        .app-button:hover { background: #5a9ac8; }
-        .app-button:disabled { background: #555; cursor: not-allowed; }
+        .app-button:hover:not(:disabled) { background: #5a9ac8; transform: translateY(-2px); }
+        .app-button:disabled { background: #555; cursor: not-allowed; opacity: 0.7; }
 
-        .image-preview-container {
-            margin-top: 20px;
-            max-width: 100%;
-            text-align: center;
-        }
-        #image-preview {
-            max-width: 100%;
-            max-height: 400px;
-            border-radius: 15px;
-            border: 2px solid var(--color-celestial-blue);
-        }
+        .image-preview-container { margin-top: 20px; max-width: 100%; text-align: center; }
+        #image-preview { max-width: 100%; max-height: 400px; border-radius: 15px; border: 2px solid var(--color-primary); }
 
         /* --- Results Area --- */
         #results-section {
-            display: none;
             margin-top: 40px;
             text-align: left;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: opacity 0.8s ease, max-height 1s ease;
+        }
+        #results-section.visible {
+            opacity: 1;
+            max-height: 2000px; /* Large enough to not clip content */
         }
         
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
         .result-card {
             background: rgba(0, 0, 0, 0.2);
             padding: 25px;
             border-radius: 15px;
-            border-left: 5px solid var(--color-celestial-blue);
+            border-left: 5px solid var(--color-primary);
+            transition: all 0.3s ease;
         }
-
         .result-card h3 {
             margin-top: 0;
-            color: var(--color-light-gray);
-            border-bottom: 1px solid var(--color-celestial-blue);
+            margin-bottom: 15px;
+            color: var(--color-text-light);
+            border-bottom: 1px solid var(--color-glass-border);
             padding-bottom: 10px;
+            font-family: var(--font-heading);
+            font-weight: 600;
         }
-        
-        #prediction-text, #aqi-text {
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
-        #confidence-text {
-            font-size: 1.1rem;
-            color: #aaa;
-        }
+        #prediction-text { font-size: 1.8rem; font-weight: bold; }
+        #aqi-text { font-size: 1.5rem; }
+        #confidence-text { font-size: 1.1rem; color: #aaa; }
         
         /* --- Toggles and Download --- */
         .controls-container {
@@ -379,515 +319,336 @@
             gap: 30px;
             flex-wrap: wrap;
         }
-        
-        .toggle-switch {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .toggle-switch label {
-            cursor: pointer;
-        }
-        
-        .toggle-switch input {
-            height: 0;
-            width: 0;
-            visibility: hidden;
-        }
-        
-        .slider {
-            cursor: pointer;
-            width: 50px;
-            height: 26px;
-            background-color: #555;
-            border-radius: 26px;
-            position: relative;
-            transition: background-color 0.2s;
-        }
-        
-        .slider:before {
-            content: "";
-            position: absolute;
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            border-radius: 50%;
-            transition: 0.2s;
-        }
-        
-        input:checked + .slider {
-            background-color: var(--color-celestial-blue);
-        }
-        
-        input:checked + .slider:before {
-            transform: translateX(24px);
-        }
+        .toggle-switch { display: flex; align-items: center; gap: 10px; }
+        .toggle-switch label { cursor: pointer; }
+        .toggle-switch input { height: 0; width: 0; visibility: hidden; }
+        .slider { cursor: pointer; width: 50px; height: 26px; background-color: #555; border-radius: 26px; position: relative; transition: background-color 0.2s; }
+        .slider:before { content: ""; position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.2s; }
+        input:checked + .slider { background-color: var(--color-primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
 
         /* --- Roadmap --- */
         #roadmap-container {
-            display: none;
-            margin-top: 40px;
-            text-align: left;
-            opacity: 0;
-            transition: opacity 0.8s ease-in-out;
+            margin-top: 40px; text-align: left;
+            max-height: 0; opacity: 0; overflow: hidden;
+            transition: max-height 0.8s ease, opacity 0.8s ease;
         }
+        #roadmap-container.visible { max-height: 1000px; opacity: 1; }
         
-        .roadmap {
-            border-left: 3px solid var(--color-celestial-blue);
-            padding-left: 30px;
-            position: relative;
-        }
-        
-        .roadmap-step {
-            margin-bottom: 40px;
-            position: relative;
-            opacity: 0;
-            transform: translateX(20px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-        
+        .roadmap { border-left: 3px solid var(--color-primary); padding-left: 30px; position: relative; }
+        .roadmap-step { margin-bottom: 40px; position: relative; opacity: 0; transform: translateX(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .roadmap-step.visible { opacity: 1; transform: translateX(0); }
         .roadmap-step::before {
-            content: '';
-            position: absolute;
-            left: -40px;
-            top: 5px;
-            width: 18px;
-            height: 18px;
-            background-color: var(--color-cosmic-black);
-            border: 3px solid var(--color-premium-gold);
-            border-radius: 50%;
-            z-index: 1;
+            content: ''; position: absolute; left: -41.5px; top: 5px; width: 18px; height: 18px;
+            background-color: var(--color-bg-dark); border: 4px solid var(--color-gold);
+            border-radius: 50%; z-index: 1;
         }
-
-        .roadmap-step h4 {
-            color: var(--color-premium-gold);
-            margin: 0 0 10px 0;
-            font-size: 1.3rem;
-        }
-        .roadmap-step p { margin: 0; color: var(--color-light-gray); }
-
+        .roadmap-step h4 { color: var(--color-gold); margin: 0 0 10px 0; font-size: 1.3rem; }
+        .roadmap-step p { margin: 0; color: var(--color-text-light); }
+        
         /*
         ==========================================================================
-        ||  CREDITS SECTION
+        ||  UTILITIES (Loading, Toast, Footer)
         ==========================================================================
         */
-        #credits {
-            background-color: var(--color-cosmic-black);
-            padding: 50px 0;
-            color: var(--color-cerulean-blue);
-            font-size: 1.1rem;
-            font-weight: 500;
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+            z-index: 9999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; color: white;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
-        
-        /* Spinner */
-        #spinner {
-            display: none;
-            margin: 20px auto;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--color-celestial-blue);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
+        #loading-overlay.visible { opacity: 1; pointer-events: all; }
+        .spinner {
+            border: 5px solid #f3f3f3; border-top: 5px solid var(--color-primary);
+            border-radius: 50%; width: 50px; height: 50px;
             animation: spin 1s linear infinite;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        #loading-overlay p { margin-top: 20px; font-size: 1.2rem; font-weight: 500;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 10000; }
+        .toast {
+            background: #333; color: #fff; padding: 15px 25px;
+            border-radius: 8px; margin-bottom: 10px; box-shadow: var(--shadow-heavy);
+            opacity: 0; transform: translateX(100%);
+            animation: slideIn 0.5s forwards;
+        }
+        .toast.error { background: #d32f2f; }
+        .toast.success { background: #388e3c; }
+        @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+
+        #credits {
+            background-color: var(--color-bg-dark); padding: 50px 0;
+            color: var(--color-primary); font-size: 1.1rem; font-weight: 500;
+        }
     </style>
 </head>
 <body>
 
-    <div class="parallax-container">
-        <!-- Parallax Background Layer -->
-        <div class="parallax-layer parallax-layer-bg"></div>
+    <div id="particles-js"></div>
+    <div id="loading-overlay"><div class="spinner"></div><p>Analyzing Image...</p></div>
+    <div id="toast-container"></div>
 
-        <!-- Content Layer -->
-        <div class="parallax-layer parallax-layer-base">
-            
-            <!-- HERO SECTION -->
-            <header id="hero" class="content-section">
-                <div class="geo-blocks">
-                    <div class="block"></div>
-                    <div class="block"></div>
-                    <div class="block"></div>
-                    <div class="block"></div>
-                    <div class="block"></div>
-                </div>
-                <h1>Air Analyzer V1 CNN 7M</h1>
-                <p>Show the image, solve the pollution.</p>
-            </header>
+    <!-- HERO SECTION -->
+    <header id="hero" class="section-container">
+        <h1>Air Analyzer Pro</h1>
+        <p>Harnessing cutting-edge AI to visualize air quality. Simply provide an image and gain immediate, actionable insights into your environment.</p>
+    </header>
 
-            <!-- HOW IT WORKS SECTION -->
-            <section id="how-it-works" class="content-section">
-                <div class="content-wrapper">
-                    <h2>How It Works</h2>
-                    <p>
-                        We have trained an AI model, and for techies, a "Convolutional Neural Network". 
-                        Upload an image, take a picture on the spot or even use Google Maps, and Air Analyzer will 
-                        accurately calculate the pollution levels of your area based on the image you provide!
-                    </p>
-                    <a href="#application" class="cta-button">Ready to test it out?</a>
-                </div>
-            </section>
-
-            <!-- APPLICATION SECTION -->
-            <main id="application" class="content-section">
-                <div class="app-container">
-                    <h2>Application</h2>
-                    
-                    <div class="mode-selector">
-                        <button class="mode-btn active" data-mode="upload">Upload Image</button>
-                        <button class="mode-btn" data-mode="camera">Use Camera</button>
-                        <button class="mode-btn" data-mode="maps">Google Maps <span class="beta-tag">Beta</span></button>
-                    </div>
-
-                    <!-- Mode: Upload Image -->
-                    <div id="upload-content" class="app-content active">
-                        <div class="upload-area" id="drop-zone">
-                            <p>Click to select an image or drag and drop it here.</p>
-                            <input type="file" id="file-input" accept="image/*" hidden>
-                        </div>
-                    </div>
-                    
-                    <!-- Mode: Use Camera -->
-                    <div id="camera-content" class="app-content">
-                        <div id="camera-view">
-                            <video id="camera-video" autoplay playsinline></video>
-                        </div>
-                        <button id="capture-btn" class="app-button">Capture & Analyze</button>
-                    </div>
-
-                    <!-- Mode: Google Maps -->
-                    <div id="maps-content" class="app-content">
-                        <div id="map"></div>
-                        <button id="analyze-map-btn" class="app-button" disabled>Analyze Street View</button>
-                        <p id="map-instructions" style="margin-top: 15px; font-size: 0.9rem;">Navigate the map and enter Street View to enable analysis.</p>
-                    </div>
-
-                    <div id="spinner"></div>
-
-                    <div class="image-preview-container">
-                        <img id="image-preview" src="" alt="Image Preview" style="display:none;" />
-                    </div>
-
-                    <!-- Results Section -->
-                    <div id="results-section">
-                        <div class="results-grid">
-                            <div class="result-card" id="prediction-card">
-                                <h3>Prediction</h3>
-                                <p id="prediction-text">-</p>
-                                <p id="confidence-text">Confidence: -</p>
-                            </div>
-                            <div class="result-card" id="aqi-card">
-                                <h3>AQI Estimate</h3>
-                                <p id="aqi-text">-</p>
-                            </div>
-                            <div class="result-card">
-                                <h3>Probability Distribution</h3>
-                                <canvas id="prediction-chart"></canvas>
-                            </div>
-                            <div class="result-card" id="recommendation-card">
-                                <h3>Recommendation</h3>
-                                <p id="recommendation-text">-</p>
-                            </div>
-                        </div>
-
-                        <div class="controls-container">
-                            <div class="toggle-switch">
-                                <span>Display Full Roadmap</span>
-                                <label class="switch">
-                                    <input type="checkbox" id="roadmap-toggle">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div class="toggle-switch">
-                                <span>Deep Mode</span>
-                                <label class="switch">
-                                    <input type="checkbox" id="deep-mode-toggle">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <button id="download-btn" class="app-button">Download Insights</button>
-                        </div>
-                        
-                        <div id="roadmap-container">
-                             <h3>Actionable Roadmap to Combat Air Pollution</h3>
-                             <div id="roadmap-content" class="roadmap"></div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-
-            <!-- CREDITS SECTION -->
-            <footer id="credits" class="content-section">
-                <p>Collaborators: Eden, Jasper, Vincent, Leon. Thanks!</p>
-            </footer>
-        </div>
+    <div class="wave-divider">
+        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="shape-fill"></path>
+        </svg>
     </div>
 
-    <!-- Google Maps API Script -->
-    <!-- IMPORTANT: Replace YOUR_GOOGLE_MAPS_API_KEY with your actual API key -->
+    <!-- HOW IT WORKS SECTION -->
+    <section id="how-it-works" class="section-container">
+        <div class="content-wrapper">
+            <h2>Instant Clarity Through AI</h2>
+            <p>
+                Our sophisticated Convolutional Neural Network (CNN) has been trained on thousands of images to detect subtle visual cues related to air pollution. Upload an image, use your camera, or explore with Google Maps, and our AI will instantly classify the air quality, providing you with data-driven recommendations.
+            </p>
+            <a href="#application" class="cta-button">Launch Analyzer</a>
+        </div>
+    </section>
+
+    <div class="wave-divider" id="divider-app">
+        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="shape-fill"></path>
+        </svg>
+    </div>
+
+    <!-- APPLICATION SECTION -->
+    <main id="application" class="section-container">
+        <div class="app-container">
+            <h2>Application Interface</h2>
+            
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="upload"><i class="fas fa-upload"></i> Upload</button>
+                <button class="mode-btn" data-mode="camera"><i class="fas fa-camera"></i> Camera</button>
+                <button class="mode-btn" data-mode="maps"><i class="fas fa-map-marked-alt"></i> Maps <span class="beta-tag">Beta</span></button>
+            </div>
+
+            <div id="upload-content" class="app-content active">
+                <div class="upload-area" id="drop-zone">
+                    <p><i class="fas fa-file-image fa-2x"></i><br>Click to select an image or drag and drop it here.</p>
+                    <input type="file" id="file-input" accept="image/*" hidden>
+                </div>
+            </div>
+            
+            <div id="camera-content" class="app-content">
+                <div id="camera-view"><video id="camera-video" autoplay playsinline></video></div>
+                <button id="capture-btn" class="app-button"><i class="fas fa-camera-retro"></i> Capture & Analyze</button>
+            </div>
+
+            <div id="maps-content" class="app-content">
+                <div id="map"></div>
+                <button id="analyze-map-btn" class="app-button" disabled><i class="fas fa-street-view"></i> Analyze Street View</button>
+                <p id="map-instructions" style="margin-top: 15px; font-size: 0.9rem;">Navigate the map and enter Street View to enable analysis.</p>
+            </div>
+
+            <div class="image-preview-container">
+                <img id="image-preview" src="" alt="Image Preview" style="display:none;" />
+            </div>
+
+            <!-- Results Section -->
+            <div id="results-section">
+                <div class="results-grid">
+                    <div class="result-card" id="prediction-card">
+                        <h3><i class="fas fa-lightbulb"></i> Prediction</h3>
+                        <p id="prediction-text">-</p>
+                        <p id="confidence-text">Confidence: -</p>
+                    </div>
+                    <div class="result-card" id="aqi-card">
+                        <h3><i class="fas fa-wind"></i> AQI Estimate</h3>
+                        <p id="aqi-text">-</p>
+                    </div>
+                    <div class="result-card">
+                        <h3><i class="fas fa-chart-bar"></i> Probability</h3>
+                        <canvas id="prediction-chart"></canvas>
+                    </div>
+                    <div class="result-card" id="recommendation-card">
+                        <h3><i class="fas fa-shield-alt"></i> Recommendation</h3>
+                        <p id="recommendation-text">-</p>
+                    </div>
+                </div>
+
+                <div class="controls-container">
+                    <div class="toggle-switch" data-tooltip="See a step-by-step action plan.">
+                        <span>Show Roadmap</span>
+                        <label class="switch"><input type="checkbox" id="roadmap-toggle"><span class="slider"></span></label>
+                    </div>
+                    <div class="toggle-switch" data-tooltip="Enable enhanced visual effects.">
+                        <span>Deep Mode</span>
+                        <label class="switch"><input type="checkbox" id="deep-mode-toggle"><span class="slider"></span></label>
+                    </div>
+                    <button id="download-btn" class="app-button" disabled><i class="fas fa-file-pdf"></i> Download PDF Report</button>
+                </div>
+                
+                <div id="roadmap-container">
+                     <h3><i class="fas fa-route"></i> Actionable Roadmap to Combat Air Pollution</h3>
+                     <div id="roadmap-content" class="roadmap"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- CREDITS SECTION -->
+    <footer id="credits" class="section-container" style="min-height: auto;">
+        <p>A collaborative project by Eden, Jasper, Vincent, and Leon. Built with passion and code.</p>
+    </footer>
+
+    <!-- ==================================================================================== -->
+    <!-- || GOOGLE MAPS API - IMPORTANT! Replace with your key                               || -->
+    <!-- ==================================================================================== -->
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap&libraries=streetView"></script>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
 
         // ========================================================================
-        // || DOM ELEMENT SELECTORS
-        // ========================================================================
-        const modeButtons = document.querySelectorAll('.mode-btn');
-        const appContents = document.querySelectorAll('.app-content');
-        const applicationSection = document.getElementById('application');
-        const spinner = document.getElementById('spinner');
-
-        // --- Upload Mode
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-input');
-        
-        // --- Camera Mode
-        const cameraView = document.getElementById('camera-view');
-        const videoElement = document.getElementById('camera-video');
-        const captureBtn = document.getElementById('capture-btn');
-        let stream;
-
-        // --- Maps Mode
-        const analyzeMapBtn = document.getElementById('analyze-map-btn');
-
-        // --- Common Elements
-        const imagePreview = document.getElementById('image-preview');
-        const resultsSection = document.getElementById('results-section');
-        const predictionText = document.getElementById('prediction-text');
-        const confidenceText = document.getElementById('confidence-text');
-        const aqiText = document.getElementById('aqi-text');
-        const recommendationText = document.getElementById('recommendation-text');
-        const downloadBtn = document.getElementById('download-btn');
-
-        // --- Toggles
-        const deepModeToggle = document.getElementById('deep-mode-toggle');
-        const roadmapToggle = document.getElementById('roadmap-toggle');
-        const roadmapContainer = document.getElementById('roadmap-container');
-        const roadmapContent = document.getElementById('roadmap-content');
-        
-        // ========================================================================
         // || CONFIGURATION & STATE
         // ========================================================================
         const MODEL_CONFIG = {
-            path: 'air_analyzer_cnn_iden_7m.onnx', // IMPORTANT: This file must be in the same directory.
+            path: 'air_analyzer_cnn_iden_7m.onnx', // Model file must be in the same directory
             imgSize: 224,
             mean: [0.485, 0.456, 0.406],
             std: [0.229, 0.224, 0.225],
-            classes: {
-                0: "Good 😊",
-                1: "Moderate 🙂", 
-                2: "Unhealthy for Sensitive Groups 😐",
-                3: "Unhealthy 😕",
-                4: "Very Unhealthy 😨",
-                5: "Hazardous 😷"
-            },
-            aqiRanges: {
-                0: "0-50 AQI", 1: "51-100 AQI", 2: "101-150 AQI",
-                3: "151-200 AQI", 4: "201-300 AQI", 5: "300+ AQI"
-            }
+            classes: { 0: "Good 😊", 1: "Moderate 🙂", 2: "Unhealthy for Sensitive 😐", 3: "Unhealthy 😕", 4: "Very Unhealthy 😨", 5: "Hazardous 😷" },
+            aqiRanges: { 0: "0-50 AQI", 1: "51-100 AQI", 2: "101-150 AQI", 3: "151-200 AQI", 4: "201-300 AQI", 5: "300+ AQI" }
         };
-
-        let ortSession;
-        let predictionChart;
+        let ortSession, predictionChart, stream;
         let lastResults = {};
+
+        // ========================================================================
+        // || DOM ELEMENT SELECTORS
+        // ========================================================================
+        const modeButtons = document.querySelectorAll('.mode-btn'), appContents = document.querySelectorAll('.app-content');
+        const applicationSection = document.getElementById('application'), dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input'), videoElement = document.getElementById('camera-video');
+        const captureBtn = document.getElementById('capture-btn'), analyzeMapBtn = document.getElementById('analyze-map-btn');
+        const imagePreview = document.getElementById('image-preview'), resultsSection = document.getElementById('results-section');
+        const predictionText = document.getElementById('prediction-text'), confidenceText = document.getElementById('confidence-text');
+        const aqiText = document.getElementById('aqi-text'), recommendationText = document.getElementById('recommendation-text');
+        const downloadBtn = document.getElementById('download-btn'), deepModeToggle = document.getElementById('deep-mode-toggle');
+        const roadmapToggle = document.getElementById('roadmap-toggle'), roadmapContainer = document.getElementById('roadmap-container');
+        const roadmapContent = document.getElementById('roadmap-content');
+        const loadingOverlay = document.getElementById('loading-overlay');
+
+        // ========================================================================
+        // || INITIALIZATION
+        // ========================================================================
+        initParticles();
+        loadModel();
 
         // ========================================================================
         // || UI & EVENT LISTENERS
         // ========================================================================
-
-        // --- Mode Switching Logic
-        modeButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const mode = button.dataset.mode;
-                
-                // Update button styles
-                modeButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-
-                // Show/hide content sections
-                appContents.forEach(content => {
-                    content.classList.remove('active');
-                    if (content.id === `${mode}-content`) {
-                        content.classList.add('active');
-                    }
-                });
-
-                // Handle camera stream
-                if (mode === 'camera' && !stream) {
-                    startCamera();
-                } else if (stream) {
-                    stopCamera();
-                }
-                
-                resetUI();
-            });
-        });
-
-        // --- Deep Mode Toggle
-        deepModeToggle.addEventListener('change', (e) => {
-            applicationSection.classList.toggle('deep-mode', e.target.checked);
-        });
+        modeButtons.forEach(button => button.addEventListener('click', () => switchMode(button.dataset.mode)));
+        deepModeToggle.addEventListener('change', (e) => applicationSection.classList.toggle('deep-mode', e.target.checked));
         
-        // --- Roadmap Toggle
         roadmapToggle.addEventListener('change', (e) => {
             if (e.target.checked) {
                 renderRoadmap(lastResults.predicted_class);
-                roadmapContainer.style.display = 'block';
+                roadmapContainer.classList.add('visible');
                 setTimeout(() => {
-                    roadmapContainer.style.opacity = 1;
-                    const steps = roadmapContent.querySelectorAll('.roadmap-step');
-                    steps.forEach((step, index) => {
-                        setTimeout(() => {
-                            step.style.opacity = 1;
-                            step.style.transform = 'translateX(0)';
-                        }, index * 200);
+                    roadmapContent.querySelectorAll('.roadmap-step').forEach((step, index) => {
+                        setTimeout(() => step.classList.add('visible'), index * 150);
                     });
                 }, 50);
             } else {
-                roadmapContainer.style.opacity = 0;
-                setTimeout(() => roadmapContainer.style.display = 'none', 500);
+                roadmapContainer.classList.remove('visible');
             }
         });
 
-
-        // --- Upload Mode Listeners
         dropZone.addEventListener('click', () => fileInput.click());
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.style.backgroundColor = 'rgba(58, 124, 165, 0.1)';
-        });
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.style.backgroundColor = 'transparent';
-        });
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.backgroundColor = 'rgba(58, 124, 165, 0.1)'; });
+        dropZone.addEventListener('dragleave', () => dropZone.style.backgroundColor = 'transparent');
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.style.backgroundColor = 'transparent';
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleImageFile(files[0]);
-            }
+            if (e.dataTransfer.files.length > 0) handleImageFile(e.dataTransfer.files[0]);
         });
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleImageFile(e.target.files[0]);
-            }
-        });
+        fileInput.addEventListener('change', (e) => { if (e.target.files.length > 0) handleImageFile(e.target.files[0]); });
         
-        // --- Camera Mode Listener
         captureBtn.addEventListener('click', captureAndAnalyze);
-
-        // --- Maps Mode Listener
         analyzeMapBtn.addEventListener('click', analyzeStreetView);
-        
-        // --- Download Listener
-        downloadBtn.addEventListener('click', downloadInsights);
+        downloadBtn.addEventListener('click', downloadPdfReport);
 
         // ========================================================================
         // || CORE AI/INFERENCE LOGIC
         // ========================================================================
-
-        // --- Load the ONNX model
         async function loadModel() {
             try {
-                ortSession = await ort.InferenceSession.create(MODEL_CONFIG.path);
+                ortSession = await ort.InferenceSession.create(MODEL_CONFIG.path, { executionProviders: ['webgl', 'wasm'] });
                 console.log('ONNX model loaded successfully.');
             } catch (error) {
                 console.error('Failed to load ONNX model:', error);
-                alert(`Error: Could not load the model file "${MODEL_CONFIG.path}". Ensure it is in the same directory as this HTML file.`);
+                showToast(`Error: Could not load model. Ensure "${MODEL_CONFIG.path}" is in the correct folder.`, 'error');
             }
         }
 
-        // --- Preprocess the image
         async function preprocessImage(imageSource) {
             const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
             canvas.width = MODEL_CONFIG.imgSize;
             canvas.height = MODEL_CONFIG.imgSize;
-
-            ctx.drawImage(imageSource, 0, 0, MODEL_CONFIG.imgSize, MODEL_CONFIG.imgSize);
-            const imageData = ctx.getImageData(0, 0, MODEL_CONFIG.imgSize, MODEL_CONFIG.imgSize);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(imageSource, 0, 0, canvas.width, canvas.height);
             
-            const { data } = imageData;
-            const float32Data = new Float32Array(3 * MODEL_CONFIG.imgSize * MODEL_CONFIG.imgSize);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const float32Data = new Float32Array(3 * canvas.width * canvas.height);
 
-            for (let i = 0; i < data.length; i += 4) {
-                const r = data[i] / 255;
-                const g = data[i + 1] / 255;
-                const b = data[i + 2] / 255;
-
-                const pixel_index = i / 4;
-                const C = 3;
-                const H = MODEL_CONFIG.imgSize;
-                const W = MODEL_CONFIG.imgSize;
-                const y = Math.floor(pixel_index / W);
-                const x = pixel_index % W;
-
-                // CHW format
-                float32Data[0 * H * W + y * W + x] = (r - MODEL_CONFIG.mean[0]) / MODEL_CONFIG.std[0];
-                float32Data[1 * H * W + y * W + x] = (g - MODEL_CONFIG.mean[1]) / MODEL_CONFIG.std[1];
-                float32Data[2 * H * W + y * W + x] = (b - MODEL_CONFIG.mean[2]) / MODEL_CONFIG.std[2];
+            for (let i = 0; i < imageData.data.length / 4; i++) {
+                const [r, g, b] = [imageData.data[i * 4] / 255, imageData.data[i * 4 + 1] / 255, imageData.data[i * 4 + 2] / 255];
+                float32Data[i] = (r - MODEL_CONFIG.mean[0]) / MODEL_CONFIG.std[0];
+                float32Data[i + canvas.width * canvas.height] = (g - MODEL_CONFIG.mean[1]) / MODEL_CONFIG.std[1];
+                float32Data[i + 2 * canvas.width * canvas.height] = (b - MODEL_CONFIG.mean[2]) / MODEL_CONFIG.std[2];
             }
-            
-            const tensor = new ort.Tensor('float32', float32Data, [1, 3, MODEL_CONFIG.imgSize, MODEL_CONFIG.imgSize]);
-            return tensor;
+            return new ort.Tensor('float32', float32Data, [1, 3, canvas.width, canvas.height]);
         }
         
-        // --- Run inference
         async function runInference(imageSource) {
             if (!ortSession) {
-                alert('Model is not loaded yet. Please wait.');
-                return;
+                showToast('Model is not ready. Please wait.', 'error'); return;
             }
             
-            showSpinner(true);
+            showLoading(true);
             resetUI(false); // Soft reset, keep image
 
             try {
                 const tensor = await preprocessImage(imageSource);
                 const feeds = { [ortSession.inputNames[0]]: tensor };
                 const results = await ortSession.run(feeds);
-                const outputTensor = results[ortSession.outputNames[0]];
+                const outputData = softmax(Array.from(results[ortSession.outputNames[0]].data));
+                const confidence = Math.max(...outputData);
+                const predicted_class = outputData.indexOf(confidence);
 
-                postprocessResults(outputTensor.data);
+                lastResults = { predicted_class, confidence, probabilities: outputData };
+                updateUI(lastResults);
             } catch (error) {
                 console.error('Inference failed:', error);
-                alert('An error occurred during analysis. Check the console for details.');
+                showToast('An error occurred during analysis.', 'error');
             } finally {
-                showSpinner(false);
+                showLoading(false);
             }
-        }
-        
-        // --- Post-process results and update UI
-        function postprocessResults(outputData) {
-            const probabilities = softmax(Array.from(outputData));
-            const confidence = Math.max(...probabilities);
-            const predicted_class = probabilities.indexOf(confidence);
-
-            lastResults = {
-                predicted_class,
-                confidence,
-                probabilities
-            };
-            
-            updateUI(lastResults);
         }
 
         // ========================================================================
         // || HELPER & MODE-SPECIFIC FUNCTIONS
         // ========================================================================
+        function switchMode(mode) {
+            modeButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
+            appContents.forEach(content => content.classList.toggle('active', content.id === `${mode}-content`));
+            
+            if (mode === 'camera' && !stream) startCamera();
+            else if (stream) stopCamera();
+            resetUI();
+        }
 
         function handleImageFile(file) {
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = e => {
                 imagePreview.src = e.target.result;
                 imagePreview.style.display = 'block';
                 imagePreview.onload = () => runInference(imagePreview);
@@ -901,7 +662,7 @@
                 videoElement.srcObject = stream;
             } catch (err) {
                 console.error("Error accessing camera:", err);
-                alert("Could not access camera. Please ensure permissions are granted.");
+                showToast("Could not access camera. Please grant permissions.", 'error');
             }
         }
 
@@ -916,8 +677,7 @@
             const canvas = document.createElement('canvas');
             canvas.width = videoElement.videoWidth;
             canvas.height = videoElement.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            canvas.getContext('2d').drawImage(videoElement, 0, 0, canvas.width, canvas.height);
             
             imagePreview.src = canvas.toDataURL('image/jpeg');
             imagePreview.style.display = 'block';
@@ -925,121 +685,99 @@
         }
         
         function analyzeStreetView() {
-            if (window.streetView && window.streetView.pano) {
-                // Use the Street View Image API for a clean, static image
-                const panoId = window.streetView.pano;
-                const heading = window.streetView.pov.heading;
-                const pitch = window.streetView.pov.pitch;
-                // NOTE: Using the static API requires billing enabled on your Google Cloud project.
-                // Replace YOUR_GOOGLE_MAPS_API_KEY with your key.
-                const imageUrl = `https://maps.googleapis.com/maps/api/streetview?pano=${panoId}&size=600x400&heading=${heading}&pitch=${pitch}&fov=90&key=AIzaSyD3EHXV7Q3JwlOPS5QPqcbFFbuNs0cMLsg`;
-
-                const img = new Image();
-                img.crossOrigin = "Anonymous";
-                img.onload = () => {
-                    imagePreview.src = img.src;
-                    imagePreview.style.display = 'block';
-                    runInference(img);
-                };
-                img.onerror = () => {
-                    alert('Could not load Street View image. Ensure your API key is correct and has Street View API enabled.');
-                };
-                img.src = imageUrl;
-            } else {
-                alert('No active Street View panorama found.');
+            if (!window.streetView || !window.streetView.pano) {
+                showToast('No active Street View panorama found.', 'error'); return;
             }
+            // IMPORTANT: The Street View Static API requires billing to be enabled on your Google Cloud project.
+            // Ensure your API key is correctly configured for this API.
+            const { pano, pov } = window.streetView;
+            const imageUrl = `https://maps.googleapis.com/maps/api/streetview?pano=${pano}&size=600x400&heading=${pov.heading}&pitch=${pov.pitch}&fov=90&key=YOUR_GOOGLE_MAPS_API_KEY`;
+
+            const img = new Image();
+            img.crossOrigin = "Anonymous"; // Required for canvas processing
+            img.onload = () => {
+                imagePreview.src = img.src;
+                imagePreview.style.display = 'block';
+                runInference(img);
+            };
+            img.onerror = () => showToast('Could not load Street View image. Check API key & permissions.', 'error');
+            img.src = imageUrl;
         }
 
-        function downloadInsights() {
+        async function downloadPdfReport() {
             if (!lastResults.predicted_class) {
-                alert("No analysis data to download.");
-                return;
+                showToast("No analysis to download.", 'error'); return;
             }
+
+            showLoading(true, "Generating PDF...");
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
             
-            const className = MODEL_CONFIG.classes[lastResults.predicted_class];
-            const aqi = MODEL_CONFIG.aqiRanges[lastResults.predicted_class];
-            const confidence = (lastResults.confidence * 100).toFixed(2);
-            const recommendation = getRecommendation(lastResults.predicted_class).join('\n\n');
-            const roadmap = getRoadmapText(lastResults.predicted_class);
+            // Set styles for PDF generation temporarily
+            resultsSection.style.backgroundColor = '#FFFFFF';
+            resultsSection.style.color = '#000000';
+            
+            const canvas = await html2canvas(resultsSection, {
+                backgroundColor: '#FFFFFF',
+                scale: 2 // Higher resolution
+            });
+            resultsSection.style.backgroundColor = ''; // Revert styles
+            resultsSection.style.color = '';
 
-            const reportContent = `
-Air Analyzer V1 CNN 7M - Analysis Report
-=========================================
+            const imgData = canvas.toDataURL('image/png');
+            const imgProps = doc.getImageProperties(imgData);
+            const pdfWidth = doc.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-Date: ${new Date().toLocaleString()}
-
-ANALYSIS RESULTS
-----------------
-- Classification: ${className}
-- Confidence: ${confidence}%
-- Estimated AQI Range: ${aqi}
-
-RECOMMENDATION
---------------
-${recommendation}
-
-ACTIONABLE ROADMAP
-------------------
-${roadmap}
-
-PROBABILITY DISTRIBUTION
-------------------------
-${Object.entries(MODEL_CONFIG.classes).map(([key, value], i) => 
-    `- ${value}: ${(lastResults.probabilities[i] * 100).toFixed(2)}%`
-).join('\n')}
-            `;
-
-            const blob = new Blob([reportContent.trim()], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'AirAnalyzer_Report.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(20);
+            doc.text('Air Analyzer Pro - Report', pdfWidth / 2, 20, { align: 'center' });
+            
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.text(new Date().toLocaleString(), pdfWidth / 2, 28, { align: 'center' });
+            
+            doc.addImage(imgData, 'PNG', 10, 40, pdfWidth - 20, pdfHeight - 20);
+            
+            doc.save('AirAnalyzer_Report.pdf');
+            showLoading(false);
         }
 
         // ========================================================================
         // || UI UPDATE FUNCTIONS
         // ========================================================================
-        
         function updateUI(results) {
-            resultsSection.style.display = 'block';
-            
-            // Prediction & AQI
+            resultsSection.classList.add('visible');
             const { predicted_class, confidence, probabilities } = results;
+            
             predictionText.textContent = MODEL_CONFIG.classes[predicted_class];
             confidenceText.textContent = `Confidence: ${(confidence * 100).toFixed(2)}%`;
             aqiText.textContent = MODEL_CONFIG.aqiRanges[predicted_class];
             
-            // Recommendation
             const recommendation = getRecommendation(predicted_class);
             recommendationText.innerHTML = `<strong>${recommendation[0]}</strong><br>${recommendation[1]}<br><br><em>${recommendation[2]}</em>`;
             
-            // Chart
             updateChart(probabilities);
             
-            // Update card colors based on severity
             const severityColor = getSeverityColor(predicted_class);
-            document.getElementById('prediction-card').style.borderColor = severityColor;
-            document.getElementById('aqi-card').style.borderColor = severityColor;
+            ['prediction-card', 'aqi-card', 'recommendation-card'].forEach(id => {
+                document.getElementById(id).style.borderColor = severityColor;
+            });
             
-            // Reset and handle roadmap
             roadmapToggle.checked = false;
-            roadmapContainer.style.opacity = 0;
-            roadmapContainer.style.display = 'none';
+            roadmapContainer.classList.remove('visible');
+            downloadBtn.disabled = false;
         }
 
         function updateChart(probabilities) {
             const labels = Object.values(MODEL_CONFIG.classes).map(c => c.split(' ')[0]);
             const data = {
-                labels: labels,
+                labels,
                 datasets: [{
-                    label: 'Pollution Class Probability',
+                    label: 'Probability',
                     data: probabilities.map(p => p * 100),
-                    backgroundColor: labels.map((_, i) => getSeverityColor(i)),
-                    borderColor: 'rgba(255, 255, 255, 0.5)',
+                    backgroundColor: labels.map((_, i) => getSeverityColor(i, 0.7)),
+                    borderColor: labels.map((_, i) => getSeverityColor(i, 1)),
                     borderWidth: 1
                 }]
             };
@@ -1050,19 +788,12 @@ ${Object.entries(MODEL_CONFIG.classes).map(([key, value], i) =>
             } else {
                 const ctx = document.getElementById('prediction-chart').getContext('2d');
                 predictionChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: data,
+                    type: 'bar', data,
                     options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                         plugins: { legend: { display: false } },
                         scales: {
-                            x: {
-                                beginAtZero: true, max: 100,
-                                ticks: { color: '#aaa', callback: value => value + '%' },
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                            },
+                            x: { beginAtZero: true, max: 100, ticks: { color: '#aaa', callback: v => v + '%' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } },
                             y: { ticks: { color: '#ddd' }, grid: { display: false } }
                         }
                     }
@@ -1070,86 +801,68 @@ ${Object.entries(MODEL_CONFIG.classes).map(([key, value], i) =>
             }
         }
         
-        function renderRoadmap(predicted_class) {
-            let steps = [];
+        function renderRoadmap(level) {
             const baseSteps = [
                 { title: "Immediate Actions", text: "Wear a high-quality mask (N95/P2) outdoors. Use air purifiers indoors and keep windows closed." },
                 { title: "Community Engagement", text: "Advocate for local policies promoting green spaces, better public transport, and stricter industrial emission controls." },
                 { title: "Personal Contribution", text: "Reduce your carbon footprint: use public transport, bike or walk. Consolidate trips. Reduce energy consumption at home." },
-                { title: "Long-Term Vision", text: "Support and invest in renewable energy sources. Promote sustainable urban planning and circular economy principles in your community." }
+                { title: "Long-Term Vision", text: "Support and invest in renewable energy sources. Promote sustainable urban planning and circular economy principles." }
             ];
+            let steps = [];
 
-            switch(predicted_class) {
-                case 5: // Hazardous
-                    steps.push({ title: "URGENT HEALTH WARNING", text: "This is a health emergency. Avoid all outdoor activity. Seek medical advice if you experience respiratory symptoms." });
-                    steps = steps.concat(baseSteps);
-                    break;
-                case 4: // Very Unhealthy
-                    steps.push({ title: "High Alert", text: "Significantly limit outdoor exposure, especially for sensitive groups. All outdoor exertion should be avoided." });
-                    steps = steps.concat(baseSteps);
-                    break;
-                case 3: // Unhealthy
-                    steps.push({ title: "Health Advisory", text: "Sensitive groups should avoid all outdoor exertion. Everyone else should limit prolonged outdoor activity." });
-                    steps = steps.concat(baseSteps.slice(1));
-                    break;
-                case 2: // Unhealthy for Sensitive
-                    steps.push({ title: "Precautionary Measures", text: "People with heart or lung disease, older adults, and children should reduce prolonged or heavy exertion outdoors." });
-                    steps = steps.concat(baseSteps.slice(2));
-                    break;
-                default: // Good / Moderate
-                    steps.push({ title: "Maintain & Improve", text: "Air quality is good, but proactive measures are key. Focus on sustainable habits to keep it this way." });
-                    steps = steps.concat(baseSteps.slice(2));
+            if (level >= 3) steps.push({ title: level === 5 ? "URGENT HEALTH WARNING" : "High Alert", text: level === 5 ? "This is a health emergency. Avoid all outdoor activity." : "Significantly limit outdoor exposure, especially for sensitive groups." });
+            if (level >= 2) steps = steps.concat(baseSteps);
+            else {
+                steps.push({ title: "Maintain & Improve", text: "Air quality is currently acceptable. Focus on sustainable habits to keep it this way." });
+                steps.push(baseSteps[2], baseSteps[3]);
             }
             
-            roadmapContent.innerHTML = steps.map(step => `
-                <div class="roadmap-step">
-                    <h4>${step.title}</h4>
-                    <p>${step.text}</p>
-                </div>
-            `).join('');
+            roadmapContent.innerHTML = steps.map(step => `<div class="roadmap-step"><h4>${step.title}</h4><p>${step.text}</p></div>`).join('');
         }
-
+        
         function resetUI(fullReset = true) {
-            resultsSection.style.display = 'none';
+            resultsSection.classList.remove('visible');
             if (fullReset) {
                 imagePreview.style.display = 'none';
                 imagePreview.src = "";
             }
             lastResults = {};
             roadmapToggle.checked = false;
-            roadmapContainer.style.display = 'none';
-        }
-        
-        function showSpinner(show) {
-            spinner.style.display = show ? 'block' : 'none';
-        }
-        
-        function getRecommendation(level) {
-            // [WHAT, HOW, WHY]
-            switch(level) {
-                case 5: return ["SEEK CLEAN AIR IMMEDIATELY", "Stay indoors in a well-sealed, air-purified space. Wear an N95 or P100 respirator if you must go out.", "Hazardous air poses a serious, immediate risk of severe health effects for everyone."];
-                case 4: return ["AVOID OUTDOOR ACTIVITY", "Postpone all outdoor plans. Keep indoor air clean with purifiers and closed windows.", "Very unhealthy air significantly increases the risk of respiratory and cardiovascular issues for all individuals."];
-                case 3: return ["LIMIT OUTDOOR EXPOSURE", "Reduce time spent outdoors, especially strenuous activities. Sensitive groups should remain indoors.", "Unhealthy air can aggravate lung and heart conditions and cause irritation even in healthy individuals."];
-                case 2: return ["BE CAUTIOUS", "If you're in a sensitive group (e.g., have asthma, are elderly), limit prolonged outdoor exertion.", "Even at this level, pollution can trigger health problems for vulnerable populations."];
-                case 1: return ["ENJOY THE AIR MINDFULLY", "It's a good day for outdoor activities. Consider walking or biking instead of driving to help keep it this way.", "Maintaining good air quality requires continuous collective effort, and your choices matter."];
-                default: return ["APPRECIATE THE CLEAN AIR", "This is the ideal air quality for all outdoor activities. Take action to preserve it.", "Protecting clean air is easier than cleaning polluted air. Support green initiatives and sustainable practices."];
-            }
-        }
-        
-        function getRoadmapText(level) {
-            // A simplified text version for the download
-            const roadmapDiv = document.createElement('div');
-            renderRoadmap(level); // Renders into the hidden #roadmap-content
-            return Array.from(roadmapContent.children).map(step => {
-                const title = step.querySelector('h4').textContent;
-                const text = step.querySelector('p').textContent;
-                return `- ${title}:\n  ${text}`;
-            }).join('\n\n');
+            roadmapContainer.classList.remove('visible');
+            downloadBtn.disabled = true;
         }
 
-        function getSeverityColor(level) {
-            const colors = ['#4CAF50', '#FFC107', '#FF9800', '#F44336', '#9C27B0', '#673AB7'];
-            return colors[level] || '#777';
+        // ========================================================================
+        // || UTILITY FUNCTIONS
+        // ========================================================================
+        function showLoading(show, text = "Analyzing Image...") {
+            loadingOverlay.querySelector('p').textContent = text;
+            loadingOverlay.classList.toggle('visible', show);
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        function getRecommendation(level) {
+            const recs = [
+                ["APPRECIATE THE CLEAN AIR", "This is the ideal air quality for all outdoor activities. Take action to preserve it.", "Protecting clean air is easier than cleaning polluted air."],
+                ["ENJOY THE AIR MINDFULLY", "It's a good day for outdoor activities. Consider walking or biking instead of driving to help keep it this way.", "Your choices matter in maintaining good air quality."],
+                ["BE CAUTIOUS", "If you're in a sensitive group (e.g., have asthma), limit prolonged outdoor exertion.", "Pollution can trigger health problems for vulnerable populations."],
+                ["LIMIT OUTDOOR EXPOSURE", "Reduce time spent outdoors, especially strenuous activities. Sensitive groups should remain indoors.", "Unhealthy air can aggravate lung and heart conditions."],
+                ["AVOID OUTDOOR ACTIVITY", "Postpone all outdoor plans. Keep indoor air clean with purifiers and closed windows.", "Very unhealthy air increases the risk of respiratory issues for all."],
+                ["SEEK CLEAN AIR IMMEDIATELY", "Stay indoors in a well-sealed, air-purified space. Wear an N95 respirator if you must go out.", "Hazardous air poses a serious, immediate risk to everyone."]
+            ];
+            return recs[level];
+        }
+
+        function getSeverityColor(level, opacity = 1) {
+            const colors = ['4, 170, 109', '255, 193, 7', '255, 152, 0', '244, 67, 54', '156, 39, 176', '103, 58, 183'];
+            return `rgba(${colors[level] || '119, 119, 119'}, ${opacity})`;
         }
         
         function softmax(arr) {
@@ -1158,11 +871,13 @@ ${Object.entries(MODEL_CONFIG.classes).map(([key, value], i) =>
             const sumExps = exps.reduce((a, b) => a + b);
             return exps.map(x => x / sumExps);
         }
-
-        // ========================================================================
-        // || INITIALIZATION
-        // ========================================================================
-        loadModel();
+        
+        function initParticles() {
+            particlesJS('particles-js', {
+                "particles": { "number": { "value": 50, "density": { "enable": true, "value_area": 800 } }, "color": { "value": "#3A7CA5" }, "shape": { "type": "circle" }, "opacity": { "value": 0.5, "random": true }, "size": { "value": 3, "random": true }, "line_linked": { "enable": true, "distance": 150, "color": "#3A7CA5", "opacity": 0.4, "width": 1 }, "move": { "enable": true, "speed": 1, "direction": "none", "random": true, "straight": false, "out_mode": "out" } },
+                "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": false } }, "modes": { "grab": { "distance": 140, "line_linked": { "opacity": 1 } } } }, "retina_detect": true
+            });
+        }
     });
 
     // ========================================================================
@@ -1172,29 +887,33 @@ ${Object.entries(MODEL_CONFIG.classes).map(([key, value], i) =>
     window.streetView = null; // Global handle for street view state
 
     function initMap() {
-        const initialLocation = { lat: 40.7291, lng: -73.9965 }; // NYC
-        map = new google.maps.Map(document.getElementById("map"), {
-            center: initialLocation,
-            zoom: 14,
-            streetViewControl: true,
-        });
+        try {
+            const initialLocation = { lat: 40.7291, lng: -73.9965 }; // NYC
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: initialLocation,
+                zoom: 14,
+                streetViewControl: true,
+            });
 
-        panorama = map.getStreetView();
-        panorama.setPosition(initialLocation);
-        
-        panorama.addListener("visible_changed", () => {
-            document.getElementById('analyze-map-btn').disabled = !panorama.getVisible();
-        });
-        
-        panorama.addListener("pano_changed", () => {
-            window.streetView = { pano: panorama.getPano(), pov: panorama.getPov() };
-        });
-        
-        panorama.addListener("pov_changed", () => {
-             window.streetView = { pano: panorama.getPano(), pov: panorama.getPov() };
-        });
+            panorama = map.getStreetView();
+            panorama.setPosition(initialLocation);
+            
+            panorama.addListener("visible_changed", () => {
+                document.getElementById('analyze-map-btn').disabled = !panorama.getVisible();
+            });
+            
+            const updateStreetViewState = () => {
+                if (panorama.getVisible()) {
+                    window.streetView = { pano: panorama.getPano(), pov: panorama.getPov() };
+                }
+            };
+            panorama.addListener("pano_changed", updateStreetViewState);
+            panorama.addListener("pov_changed", updateStreetViewState);
+        } catch(e) {
+            console.error("Google Maps failed to initialize. This is often due to an invalid or missing API key.", e);
+            document.getElementById('maps-content').innerHTML = '<p style="color: #ff9800;">Google Maps could not be loaded. Please ensure a valid API key is provided and the page is reloaded.</p>';
+        }
     }
-
     </script>
 </body>
 </html>
